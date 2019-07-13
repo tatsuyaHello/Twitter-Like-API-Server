@@ -23,6 +23,12 @@ type Post struct {
 	PostedAt     string `json:"posted_at"`
 }
 
+// TestUser はテストユーザに関する構造体である
+type TestUser struct {
+	ID   string
+	Name string
+}
+
 // dbInit はDBの初期化を行う
 func dbInit() {
 	db, err := gorm.Open("sqlite3", "post.sqlite3")
@@ -70,8 +76,19 @@ func createPost(c *gin.Context) {
 	var post Post
 	c.BindJSON(&post)
 
-	// UserDBを作成すべき、、、
-	if (post.UserID != "11111111-1111-1111-1111-111111111111") && (post.UserID != "22222222-2222-2222-2222-222222222222") && (post.UserID != "33333333-3333-3333-3333-333333333333") {
+	// usersにはDBのTestUserに格納されている全ユーザの情報が格納される
+	users := []TestUser{}
+	db.Find(&users)
+
+	// 有効なユーザであるか確認している
+	checkValid := false
+	for i := 0; i < len(users); i++ {
+		if users[i].ID == post.UserID {
+			checkValid = true
+		}
+	}
+
+	if !checkValid {
 		c.JSON(400, gin.H{
 			"result":  "NG",
 			"message": "ユーザIDが不適切です",
@@ -113,9 +130,21 @@ func createPostComment(c *gin.Context) {
 		var post Post
 		c.BindJSON(&post)
 
+		// usersにはDBのTestUserに格納されている全ユーザの情報が格納される
+		users := []TestUser{}
+		db.Find(&users)
+
+		// 有効なユーザであるか確認している
+		checkValid := false
+		for i := 0; i < len(users); i++ {
+			if users[i].ID == post.UserID {
+				checkValid = true
+			}
+		}
+
 		// ユーザのIDが適切であるかを判断している
 		// UserDBを作成すべき、、、
-		if (post.UserID != "11111111-1111-1111-1111-111111111111") && (post.UserID != "22222222-2222-2222-2222-222222222222") && (post.UserID != "33333333-3333-3333-3333-333333333333") {
+		if !checkValid {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"result":  "NG",
 				"message": "ユーザIDが不適切です",
