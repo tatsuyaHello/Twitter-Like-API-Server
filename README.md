@@ -1,9 +1,13 @@
 # Twitter-Like-API-Server
 
 ### APIサーバの起動方法
-1. git clone origin https://github.com/tatsuyaHello/Twitter-Like-API-Server.git
+1. `git clone origin https://github.com/tatsuyaHello/Twitter-Like-API-Server.git`
 
-2. test_usersテーブルを作成する
+2. `go run main.go` 
+
+3. `sqlite3 post.sqlite3`
+
+4. test_usersテーブルを作成する
 ```
 CREATE TABLE test_users (
   id varchar(36) NOT NULL,
@@ -22,3 +26,5 @@ INSERT INTO test_users(id, name) VALUES
   ,(@user_2, 'bob')
   ,(@user_3, 'charlie');
 ``` 
+
+5. `go run main.go` でサーバを起動し直す
