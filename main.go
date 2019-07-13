@@ -14,6 +14,7 @@ import (
 	"gopkg.in/go-playground/validator.v9"
 )
 
+// Post is
 type Post struct {
 	ID           string `json:"id"`
 	UserID       string `json:"user_id"`
@@ -172,7 +173,13 @@ func main() {
 	// 投稿一覧
 	router.GET("/posts", func(c *gin.Context) {
 		posts := dbGetAll()
-		c.JSON(200, posts)
+		fmt.Println("AAAAAA")
+		for i := 0; i < len(posts); i++ {
+			fmt.Println(*posts[i])
+		}
+		c.JSON(200, gin.H{
+			"posts": posts,
+		})
 	})
 
 	// 投稿へのコメント一覧
