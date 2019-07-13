@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
 	"time"
 
@@ -14,7 +13,7 @@ import (
 	"gopkg.in/go-playground/validator.v9"
 )
 
-// Post is
+// Post は投稿に関する構造体
 type Post struct {
 	ID           string `json:"id"`
 	UserID       string `json:"user_id"`
@@ -63,7 +62,6 @@ func dbGetComment(param string) []*Post {
 
 // createPost は新規投稿を作成する
 func createPost(c *gin.Context) {
-	fmt.Println("投稿作成の方に入れたよ")
 	db, err := gorm.Open("sqlite3", "post.sqlite3")
 	if err != nil {
 		panic("You can't open DB (dbInsert())")
@@ -71,6 +69,8 @@ func createPost(c *gin.Context) {
 	defer db.Close()
 	var post Post
 	c.BindJSON(&post)
+
+	// UserDBを作成すべき、、、
 	if (post.UserID != "11111111-1111-1111-1111-111111111111") && (post.UserID != "22222222-2222-2222-2222-222222222222") && (post.UserID != "33333333-3333-3333-3333-333333333333") {
 		c.JSON(400, gin.H{
 			"result": "ユーザIDが不適切です",
@@ -79,8 +79,8 @@ func createPost(c *gin.Context) {
 	}
 
 	validate := validator.New()
-	err2 := validate.Struct(post)
-	if err2 != nil {
+	validateErr := validate.Struct(post)
+	if validateErr != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"result": "不正なコンテンツです",
 		})
@@ -92,7 +92,7 @@ func createPost(c *gin.Context) {
 	post.ID = uuid.String()
 	post.ParentPostID = ""
 	post.CommentCount = 0
-	post.PostedAt = time.Now().Format("2018-05-01 11:20:10")
+	post.PostedAt = time.Now().Format("2006-01-02 15:04:05")
 
 	db.Create(&post)
 	c.JSON(http.StatusOK, gin.H{
@@ -102,21 +102,17 @@ func createPost(c *gin.Context) {
 
 // createPostComment はあるPost_idに関する新規コメントを作成する
 func createPostComment(c *gin.Context) {
-	fmt.Println(c.Param("post_id"))
-	fmt.Println("AAAAAAAAAA")
-	fmt.Println(c.Param("action"))
 	if c.Param("action") == "/comments/create" {
-		fmt.Println("投稿のコメント作成の方へ入れたよ〜")
 		db, err := gorm.Open("sqlite3", "post.sqlite3")
 		if err != nil {
 			panic("You can't open DB (dbInsertComment())")
 		}
 		defer db.Close()
 		var post Post
-		//var post2 Post
 		c.BindJSON(&post)
 
 		// ユーザのIDが適切であるかを判断している
+		// UserDBを作成すべき、、、
 		if (post.UserID != "11111111-1111-1111-1111-111111111111") && (post.UserID != "22222222-2222-2222-2222-222222222222") && (post.UserID != "33333333-3333-3333-3333-333333333333") {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"result": "ユーザIDが不適切です",
@@ -126,8 +122,8 @@ func createPostComment(c *gin.Context) {
 
 		// Textが validation をクリアしているかを判断している
 		validate := validator.New()
-		err2 := validate.Struct(post)
-		if err2 != nil {
+		validateErr := validate.Struct(post)
+		if validateErr != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"result": "不正なコンテンツです",
 			})
@@ -140,8 +136,11 @@ func createPostComment(c *gin.Context) {
 
 		post.ParentPostID = c.Param("post_id")
 
-		var post2 Post
-		result := db.Where("ID = ?", post.ParentPostID).First(&post2).Update("CommentCount", (post2.CommentCount + 1))
+		// parentPostはコメントポストの元となる親元のポストが入る
+		var parentPost Post
+
+		// コメントを作成するので、その元となる投稿のCommentCountを増加させる
+		result := db.Where("ID = ?", post.ParentPostID).First(&parentPost).Update("CommentCount", (parentPost.CommentCount + 1))
 		if result.Error != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"result": "PostIDが不適切です",
@@ -150,7 +149,7 @@ func createPostComment(c *gin.Context) {
 		}
 
 		post.CommentCount = 0
-		post.PostedAt = time.Now().Format("2018-05-01 11:20:10")
+		post.PostedAt = time.Now().Format("2006-01-02 15:04:05")
 
 		db.Create(&post)
 		c.JSON(http.StatusOK, gin.H{
@@ -173,10 +172,7 @@ func main() {
 	// 投稿一覧
 	router.GET("/posts", func(c *gin.Context) {
 		posts := dbGetAll()
-		fmt.Println("AAAAAA")
-		for i := 0; i < len(posts); i++ {
-			fmt.Println(*posts[i])
-		}
+
 		c.JSON(200, gin.H{
 			"posts": posts,
 		})
