@@ -96,6 +96,7 @@ func createPost(c *gin.Context) {
 		return
 	}
 
+	// Textが validation をクリアしているかを判断している
 	validate := validator.New()
 	validateErr := validate.Struct(post)
 	if validateErr != nil {
@@ -115,6 +116,7 @@ func createPost(c *gin.Context) {
 
 	db.Create(&post)
 
+	// サーバ側でエラーが発生した場合の処理
 	if err != nil {
 		c.JSON(http.StatusServiceUnavailable, gin.H{
 			"message": "server error",
@@ -149,8 +151,6 @@ func createPostComment(c *gin.Context) {
 			}
 		}
 
-		// ユーザのIDが適切であるかを判断している
-		// UserDBを作成すべき、、、
 		if !checkValid {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"result":  "NG",
@@ -194,6 +194,7 @@ func createPostComment(c *gin.Context) {
 
 		db.Create(&post)
 
+		// サーバ側でエラーが発生した場合の処理
 		if err != nil {
 			c.JSON(http.StatusServiceUnavailable, gin.H{
 				"message": "server error",
@@ -222,6 +223,7 @@ func main() {
 	router.GET("/posts", func(c *gin.Context) {
 		posts, err := dbGetAll()
 
+		// サーバ側でエラーが発生した場合の処理
 		if err != nil {
 			c.JSON(http.StatusServiceUnavailable, gin.H{
 				"message": "server error",
@@ -237,6 +239,7 @@ func main() {
 	router.GET("/posts/:post_id/comments", func(c *gin.Context) {
 		postComments, err := dbGetComment(c.Param("post_id"))
 
+		// サーバ側でエラーが発生した場合の処理
 		if err != nil {
 			c.JSON(http.StatusServiceUnavailable, gin.H{
 				"message": "server error",
