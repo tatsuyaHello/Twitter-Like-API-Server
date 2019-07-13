@@ -40,7 +40,7 @@ func dbInit() {
 }
 
 // dbGetAll はデータベースにある全てのPostを取得する
-func dbGetAll() []*Post {
+func dbGetAll() ([]*Post, error) {
 	db, err := gorm.Open("sqlite3", "post.sqlite3")
 	if err != nil {
 		panic("You failed to dbGetAll")
@@ -48,11 +48,11 @@ func dbGetAll() []*Post {
 	defer db.Close()
 	var posts []*Post
 	db.Order("posted_at desc").Find(&posts)
-	return posts
+	return posts, err
 }
 
 // dbGetComment はデータベースにある特定のPost_idに関するコメントを取得する
-func dbGetComment(param string) []*Post {
+func dbGetComment(param string) ([]*Post, error) {
 	db, err := gorm.Open("sqlite3", "post.sqlite3")
 	if err != nil {
 		panic("You failed to dbGetAll")
@@ -63,7 +63,7 @@ func dbGetComment(param string) []*Post {
 	// パスに記述されている post_id を取得している
 	postID := param
 	db.Order("posted_at desc").Find(&posts, "parent_post_id = ?", postID)
-	return posts
+	return posts, err
 }
 
 // createPost は新規投稿を作成する
@@ -114,6 +114,13 @@ func createPost(c *gin.Context) {
 	post.PostedAt = time.Now().Format("2006-01-02 15:04:05")
 
 	db.Create(&post)
+
+	if err != nil {
+		c.JSON(http.StatusServiceUnavailable, gin.H{
+			"message": "server error",
+		})
+	}
+
 	c.JSON(http.StatusOK, gin.H{
 		"result": "OK",
 	})
@@ -186,6 +193,13 @@ func createPostComment(c *gin.Context) {
 		post.PostedAt = time.Now().Format("2006-01-02 15:04:05")
 
 		db.Create(&post)
+
+		if err != nil {
+			c.JSON(http.StatusServiceUnavailable, gin.H{
+				"message": "server error",
+			})
+		}
+
 		c.JSON(http.StatusOK, gin.H{
 			"result": "OK",
 		})
@@ -206,7 +220,13 @@ func main() {
 
 	// 投稿一覧
 	router.GET("/posts", func(c *gin.Context) {
-		posts := dbGetAll()
+		posts, err := dbGetAll()
+
+		if err != nil {
+			c.JSON(http.StatusServiceUnavailable, gin.H{
+				"message": "server error",
+			})
+		}
 
 		c.JSON(200, gin.H{
 			"posts": posts,
@@ -215,7 +235,14 @@ func main() {
 
 	// 投稿へのコメント一覧
 	router.GET("/posts/:post_id/comments", func(c *gin.Context) {
-		postComments := dbGetComment(c.Param("post_id"))
+		postComments, err := dbGetComment(c.Param("post_id"))
+
+		if err != nil {
+			c.JSON(http.StatusServiceUnavailable, gin.H{
+				"message": "server error",
+			})
+		}
+
 		c.JSON(200, postComments)
 	})
 
