@@ -74,7 +74,7 @@ func createPost(c *gin.Context) {
 	if (post.UserID != "11111111-1111-1111-1111-111111111111") && (post.UserID != "22222222-2222-2222-2222-222222222222") && (post.UserID != "33333333-3333-3333-3333-333333333333") {
 		c.JSON(400, gin.H{
 			"result":  "NG",
-			"message": "<ユーザIDが不適切です>",
+			"message": "ユーザIDが不適切です",
 		})
 		return
 	}
@@ -84,7 +84,7 @@ func createPost(c *gin.Context) {
 	if validateErr != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"result":  "NG",
-			"message": "<テキストの長さが不適切です>",
+			"message": "テキストの長さが不適切です",
 		})
 		return
 	}
@@ -118,7 +118,7 @@ func createPostComment(c *gin.Context) {
 		if (post.UserID != "11111111-1111-1111-1111-111111111111") && (post.UserID != "22222222-2222-2222-2222-222222222222") && (post.UserID != "33333333-3333-3333-3333-333333333333") {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"result":  "NG",
-				"message": "<ユーザIDが不適切です>",
+				"message": "ユーザIDが不適切です",
 			})
 			return
 		}
@@ -129,7 +129,7 @@ func createPostComment(c *gin.Context) {
 		if validateErr != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"result":  "NG",
-				"message": "<テキストの長さが不適切です>",
+				"message": "テキストの長さが不適切です",
 			})
 			return
 		}
@@ -148,7 +148,7 @@ func createPostComment(c *gin.Context) {
 		if result.Error != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"result":  "NG",
-				"message": "<PostIDが不適切です>",
+				"message": "PostIDが不適切です",
 			})
 			return
 		}
@@ -163,7 +163,7 @@ func createPostComment(c *gin.Context) {
 	} else {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"result":  "NG",
-			"message": "<不適切なURLです>",
+			"message": "不適切なURLです",
 		})
 	}
 }
