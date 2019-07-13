@@ -84,7 +84,7 @@ func createPost(c *gin.Context) {
 	if validateErr != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"result":  "NG",
-			"message": "<不正なコンテンツです>",
+			"message": "<テキストの長さが不適切です>",
 		})
 		return
 	}
@@ -129,7 +129,7 @@ func createPostComment(c *gin.Context) {
 		if validateErr != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"result":  "NG",
-				"message": "<不正なコンテンツです>",
+				"message": "<テキストの長さが不適切です>",
 			})
 			return
 		}
